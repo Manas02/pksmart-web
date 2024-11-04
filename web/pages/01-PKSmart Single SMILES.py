@@ -139,7 +139,7 @@ if st.button("Run PKSmart"):
                 loaded = pickle.load(f)
                 human_predictions["fup_fe"]= loaded.predict(fup_Tc.values.reshape(-1, 1)).round(2)
             human_predictions['fup_min'] = human_predictions['fup'] / human_predictions['fup_fe']
-            human_predictions['fup_max'] = human_predictions['fup'] * human_predictions['fup_fe']
+            human_predictions['fup_max'] = human_predictions['fup'] * human_predictions['fup_fe'].clip(upper=1)
             alert_message = f"Alert: This Molecule May Be Out Of AD for fup (<{threshold} Tc with Training data)"
             if ts_data['human_fup'].values[0] < threshold:
                 st.markdown(f"<span style='color:red;'>Alert: This Molecule May Be Out Of AD for fup (<{threshold} Tc with Training data)</span>", unsafe_allow_html=True)
