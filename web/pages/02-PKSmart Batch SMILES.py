@@ -181,7 +181,7 @@ def run_pksmart(smiles_list):
     st.subheader("Animal Pharmacokinetics Predictions")
     st.dataframe(display_predictions[['smiles_r'] + animal_columns].round(2).head(), hide_index=True)
 
-    combined_predictions = pd.merge(human_predictions, animal_predictions[animal_columns + ['smiles_r']], on='smiles_r')
+    combined_predictions = pd.merge(human_predictions, display_predictions[animal_columns + ['smiles_r']], on='smiles_r')
 
     return combined_predictions
 
