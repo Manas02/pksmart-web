@@ -27,7 +27,7 @@ st.set_page_config(
 left_col, right_col = st.columns(2)
 
 right_col.write("# Welcome to PKSmart")
-right_col.write("v2.0")
+right_col.write("v3.0")
 right_col.write("Created by Srijit Seal and Andreas Bender")
 left_col.image("logo_front.png")
 
@@ -39,7 +39,7 @@ left_col.markdown(
     Select from the sidebar to predict single molecule PK properties or submit a bulk job!
     
     ### Want to learn more?
-    - Check out our paper at [bioarxiv](https://streamlit.io)
+    - Check out our paper at [bioarxiv](https://www.biorxiv.org/content/10.1101/2024.02.02.578658v1)
     """
 )
 right_col.image("logo_bottom.png")
@@ -77,7 +77,22 @@ def run_pksmart(smiles_list):
 
     # Standardize and calculate descriptors for the input molecules
     data['standardized_smiles'] = data['smiles_r'].apply(standardize)
+    
+    # Identify invalid SMILES
+    invalid_smiles = data[data['standardized_smiles'] == "Cannot_do"]
+    
 
+    # Display invalid SMILES in the Streamlit app
+    if not invalid_smiles.empty:
+
+        invalid_smiles = invalid_smiles.rename(columns={"smiles_r":"input smiles"})
+        st.write("One or more invalid SMILES:")
+        st.write(invalid_smiles)
+    
+    data = data[data['standardized_smiles'] != "Cannot_do"].reset_index(drop = True)
+
+    st.write("Predictions for valid SMILES below:")
+    
     for smiles in data["standardized_smiles"].values:
         check_if_in_training_data(smiles)
 
@@ -247,6 +262,9 @@ right_info_col.markdown(
         ### Funding
         - Cambridge Centre for Data Driven Discovery and Accelerate Programme for Scientific Discovery under the project title “Theoretical, Scientific, and Philosophical Perspectives on Biological Understanding in the Age of Artificial Intelligence”, made possible by a donation from Schmidt Futures
         - Cambridge Commonwealth, European and International Trust
+        - National Institutes of Health (NIH MIRA R35 GM122547 to Anne E Carpenter) 
+        - Massachusetts Life Sciences Center Bits to Bytes Capital Call program for funding the data analysis (to Shantanu Singh, Broad Institute of MIT and Harvard)
+        - OASIS Consortium organised by HESI (OASIS to Shantanu Singh, Broad Institute of MIT and Harvard)
         - Boak Student Support Fund (Clare Hall)
         - Jawaharlal Nehru Memorial Fund
         - Allen, Meek and Read Fund
@@ -260,3 +278,44 @@ right_info_col.markdown(
         Apache License 2.0
         """
     )
+# Values and definitions
+definitions = {
+    # Animal Parameters
+    "dog_VDss_L_kg": "Volume of distribution at steady state for dog (L/kg)",
+    "dog_CL_mL_min_kg": "Clearance rate for dog (mL/min/kg)",
+    "dog_fup": "Fraction unbound in plasma for dog",
+    "monkey_VDss_L_kg": "Volume of distribution at steady state for monkey (L/kg)",
+    "monkey_CL_mL_min_kg": "Clearance rate for monkey (mL/min/kg)",
+    "monkey_fup": "Fraction unbound in plasma for monkey",
+    "rat_VDss_L_kg": "Volume of distribution at steady state for rat (L/kg)",
+    "rat_CL_mL_min_kg": "Clearance rate for rat (mL/min/kg)",
+    "rat_fup": "Fraction unbound in plasma for rat",
+    
+    # Human Parameters
+    "CL_fe": "Fold error for human clearance (CL)",
+    "CL": "Predicted value for human clearance (CL, mL/min/kg)",
+    "CL_min": "Minimum predicted value for human clearance (CL, mL/min/kg)",
+    "CL_max": "Maximum predicted value for human clearance (CL, mL/min/kg)",
+    "Vd_fe": "Fold error for human volume of distribution (VDss)",
+    "VDss": "Predicted value for human volume of distribution (VDss, L/kg)",
+    "Vd_min": "Minimum predicted value for human volume of distribution (VDss, L/kg)",
+    "Vd_max": "Maximum predicted value for human volume of distribution (VDss, L/kg)",
+    "MRT_fe": "Fold error for human mean residence time (MRT)",
+    "MRT": "Predicted value for human mean residence time (MRT, min)",
+    "MRT_min": "Minimum predicted value for human mean residence time (MRT, min)",
+    "MRT_max": "Maximum predicted value for human mean residence time (MRT, min)",
+    "thalf_fe": "Fold error for human half-life (t1/2)",
+    "thalf": "Predicted value for human half-life (t1/2, min)",
+    "thalf_min": "Minimum predicted value for human half-life (t1/2, min)",
+    "thalf_max": "Maximum predicted value for human half-life (t1/2, min)",
+    "fup_fe": "Fold error for human fraction unbound in plasma (fup)",
+    "fup": "Predicted value for human fraction unbound in plasma (fup)",
+    "fup_min": "Minimum predicted value for human fraction unbound in plasma (fup)",
+    "fup_max": "Maximum predicted value for human fraction unbound in plasma (fup)"
+}
+
+
+# Display definitions
+st.markdown("### Definitions")
+for key, description in definitions.items():
+    st.write(f"**{key}**: {description}")

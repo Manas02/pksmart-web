@@ -553,5 +553,16 @@ def plot_ad(Vd_Tc, CL_Tc, fup_Tc, MRT_Tc ,thalf_Tc):
 def check_if_in_training_data(smiles):
     df = pd.read_csv("../data/Train_data_features.csv")
     if smiles in df['smiles_r'].values:
-        st.text(f"SMILES string {smiles} was found in Training data with following features:")
-        st.dataframe(df[df['smiles_r'] == smiles][['human_VDss_L_kg','human_CL_mL_min_kg','human_fup','human_mrt','human_thalf']], hide_index=True)
+        # Specify the columns to modify
+        cols_to_multiply = ['human_VDss_L_kg', 'human_CL_mL_min_kg', 'human_mrt', 'human_thalf']
+        
+        # Ensure columns are numeric before applying exponentiation
+        for col in cols_to_multiply:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+        # Apply the exponentiation
+        df.loc[df['smiles_r'] == smiles, cols_to_multiply] = 10 ** df.loc[df['smiles_r'] == smiles, cols_to_multiply]
+        
+        # Display results using Streamlit
+        st.text(f"SMILES string {smiles} was found in Training data with the following features:")
+        st.dataframe(df[df['smiles_r'] == smiles][['human_VDss_L_kg', 'human_CL_mL_min_kg', 'human_fup', 'human_mrt', 'human_thalf']], hide_index=True)
