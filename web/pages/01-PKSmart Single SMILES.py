@@ -62,12 +62,14 @@ smiles_input = st.text_area(
     "Enter SMILES:",
     help="You can enter one SMILES"
 )
-
-smiles_list = [smiles_input.strip()]
+try:
+    smiles_list = [Chem.MolToSmiles(Chem.MolFromSmiles(smiles_input.strip()))]
+except:
+    st.error("Invalid SMILES entered. Please check the input and try again.")
 
 # Check if the user has provided input
 if st.button("Run PKSmart"):
-    if smiles_list:                
+    if smiles_list:
         with st.spinner('Running PKSmart ...'): 
             # Create an empty DataFrame to hold the SMILES and predictions
             data = pd.DataFrame(smiles_list, columns=['smiles_r'])

@@ -70,6 +70,13 @@ elif smiles_input:
     # Process the input to handle comma-separated SMILES
     smiles_list = [smile.strip() for smile in smiles_input.split(",") if smile.strip()]
 
+smiles_list_valid = []
+for smile in smiles_list:
+    if Chem.MolFromSmiles(smile):
+        smiles_list_valid.append(Chem.MolToSmiles(Chem.MolFromSmiles(smile)))
+    else:
+        st.error(f"Invalid SMILES: {smile}. Skipping this molecule.")
+
 @st.cache_data
 def run_pksmart(smiles_list):
     # Create an empty DataFrame to hold the SMILES and predictions
@@ -202,8 +209,8 @@ def run_pksmart(smiles_list):
 
 # Check if the user has provided input
 if st.button("Run PKSmart"):
-    if smiles_list:
-        combined_predictions = run_pksmart(smiles_list)
+    if smiles_list_valid:
+        combined_predictions = run_pksmart(smiles_list_valid)
 
         column_mapping = {
             "VDss": "Volume_of_distribution_(VDss)(L/kg)",
