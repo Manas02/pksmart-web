@@ -27,7 +27,7 @@ st.set_page_config(
 left_col, right_col = st.columns(2)
 
 right_col.write("# Welcome to PKSmart")
-right_col.write("v3.0")
+right_col.write("v3.1")
 right_col.write("Created by Srijit Seal and Andreas Bender")
 left_col.image("logo_front.png")
 
@@ -71,24 +71,26 @@ elif smiles_input:
     smiles_list = [smile.strip() for smile in smiles_input.split(",") if smile.strip()]
 
 smiles_list_valid = []
+smiles_list_valid_input = []
 for smile in smiles_list:
     if Chem.MolFromSmiles(smile):
         smiles_list_valid.append(Chem.MolToSmiles(Chem.MolFromSmiles(smile)))
+        smiles_list_valid_input.append(smile)
     else:
         st.error(f"Invalid SMILES: {smile}. Skipping this molecule.")
 
 @st.cache_data
-def run_pksmart(smiles_list):
+def run_pksmart(smiles_list, smiles_list_valid_input):
     # Create an empty DataFrame to hold the SMILES and predictions
     data = pd.DataFrame(smiles_list, columns=['smiles_r'])
 
     # Standardize and calculate descriptors for the input molecules
+    data['input_smiles'] = smiles_list_valid_input
     data['standardized_smiles'] = data['smiles_r'].apply(standardize)
     
     # Identify invalid SMILES
     invalid_smiles = data[data['standardized_smiles'] == "Cannot_do"]
     
-
     # Display invalid SMILES in the Streamlit app
     if not invalid_smiles.empty:
 
@@ -196,12 +198,14 @@ def run_pksmart(smiles_list):
     )
 
     human_predictions = human_predictions[[col for col in human_predictions if col != 'comments'] + ['comments']]
-
+    human_predictions['input_smiles'] = smiles_list_valid_input
+    # place input smiles at the beginning
+    human_predictions = human_predictions[['input_smiles'] + [col for col in human_predictions if col != 'input_smiles']]
     # Display the human predictions in a table
     st.dataframe(human_predictions.round(2).head(), hide_index=True)
 
     st.subheader("Animal Pharmacokinetics Predictions")
-    st.dataframe(display_predictions[['smiles_r'] + animal_columns].round(2).head(), hide_index=True)
+    st.dataframe(display_predictions[['input_smiles', 'smiles_r'] + animal_columns].round(2).head(), hide_index=True)
 
     combined_predictions = pd.merge(human_predictions, display_predictions[animal_columns + ['smiles_r']], on='smiles_r')
 
@@ -210,7 +214,7 @@ def run_pksmart(smiles_list):
 # Check if the user has provided input
 if st.button("Run PKSmart"):
     if smiles_list_valid:
-        combined_predictions = run_pksmart(smiles_list_valid)
+        combined_predictions = run_pksmart(smiles_list_valid, smiles_list_valid_input)
 
         column_mapping = {
             "VDss": "Volume_of_distribution_(VDss)(L/kg)",
@@ -235,6 +239,7 @@ if st.button("Run PKSmart"):
             "thalf_max": "Half_life_(thalf)_upperbound"
         }
         combined_predictions.rename(columns=column_mapping, inplace=True)
+        combined_predictions['input_smiles'] = smiles_list_valid_input
 
         # Optionally, download results as CSV
         st.subheader("Download Results")
@@ -256,7 +261,7 @@ left_info_col.markdown(
         ### Authors
         
         ##### Srijit Seal 
-        - Email:  <seal@broadinstitute.org>
+        - Website:  https://srijitseal.com
         - GitHub: https://github.com/srijitseal
         ##### Andreas Bender 
         - Email: <ab454@cam.ac.uk>
@@ -283,6 +288,7 @@ right_info_col.markdown(
         """
         ### License
         Apache License 2.0
+        | Dev: Manas Mahale
         """
     )
 # Values and definitions

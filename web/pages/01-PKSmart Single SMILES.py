@@ -32,7 +32,7 @@ st.set_page_config(
 left_col, right_col = st.columns(2)
 
 right_col.write("# Welcome to PKSmart")
-right_col.write("v3.0")
+right_col.write("v3.1")
 right_col.write("Created by Srijit Seal and Andreas Bender")
 left_col.image("logo_front.png")
 
@@ -63,6 +63,7 @@ smiles_input = st.text_area(
     help="You can enter one SMILES"
 )
 try:
+    input_smiles_in_df = smiles_input.strip()
     smiles_list = [Chem.MolToSmiles(Chem.MolFromSmiles(smiles_input.strip()))]
 except:
     st.error("Invalid SMILES entered. Please check the input and try again.")
@@ -98,6 +99,7 @@ if st.button("Run PKSmart"):
 
                 # Create a copy of animal_predictions to avoid modifying the original
                 display_predictions = animal_predictions.copy()
+                display_predictions['input_smiles'] = input_smiles_in_df
                 for key in animal_columns:
                     if not key.endswith("_fup"):
                         display_predictions[key] = 10**display_predictions[key]
@@ -110,6 +112,8 @@ if st.button("Run PKSmart"):
                 with open("../data/features_mfp_mordred_animal_artificial_human_modelcolumns.txt") as f:
                     model_features = f.read().splitlines()
 
+                data_mordred['input_smiles'] = input_smiles_in_df
+                human_predictions['input_smiles'] = data_mordred['input_smiles']
                 human_predictions['smiles_r'] = data_mordred['smiles_r']
 
                 human_predictions['VDss'] = 10**predict_VDss(data_mordred, model_features)
@@ -383,7 +387,7 @@ if st.button("Run PKSmart"):
                 st.dataframe(human_predictions.round(2).head(), hide_index=True)
 
                 st.subheader("Animal Pharmacokinetics Predictions")
-                st.dataframe(display_predictions[['smiles_r'] + animal_columns].round(2).head(), hide_index=True)
+                st.dataframe(display_predictions[['input_smiles', 'smiles_r'] + animal_columns].round(2).head(), hide_index=True)
 
 #################
 
@@ -398,7 +402,7 @@ left_info_col.markdown(
         ### Authors
         
         ##### Srijit Seal 
-        - Email:  <seal@broadinstitute.org>
+        - Website:  https://srijitseal.com
         - GitHub: https://github.com/srijitseal
         ##### Andreas Bender 
         - Email: <ab454@cam.ac.uk>
@@ -425,6 +429,7 @@ right_info_col.markdown(
         """
         ### License
         Apache License 2.0
+        | Dev: Manas Mahale
         """
     )
 

@@ -10,7 +10,7 @@ st.set_page_config(
 left_col, right_col = st.columns(2)
 
 right_col.write("# Welcome to PKSmart")
-right_col.write("v3.0")
+right_col.write("v3.1")
 right_col.write("Created by Srijit Seal and Andreas Bender")
 left_col.image("logo_front.png")
 
@@ -57,7 +57,7 @@ left_info_col.markdown(
         ### Authors
         
         ##### Srijit Seal 
-        - Email:  <seal@broadinstitute.org>
+        - Website:  https://srijitseal.com
         - GitHub: https://github.com/srijitseal
         ##### Andreas Bender 
         - Email: <ab454@cam.ac.uk>
@@ -84,5 +84,6 @@ right_info_col.markdown(
         """
         ### License
         Apache License 2.0
+        | Dev: Manas Mahale
         """
     )
